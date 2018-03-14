@@ -74,12 +74,14 @@ public class TileBuilder : MonoBehaviour {
 		//if no map found create a new map
 		StreamReader reader = new StreamReader(filePath);
 		string file = reader.ReadLine();
-		string[] splitStr = file.Split (' ');
-		//for splitStr length had to account for terminating character?
-		if (splitStr.Length - 1 == map.Length * map [0].Length) {
-			for (int i = 0; i < map.Length; i++) {
-				for (int j = 0; j < map [i].Length; j++) {
-					map [i] [j] = int.Parse (splitStr [(i * map [i].Length) + j]);
+		if (file != null) {
+			string[] splitStr = file.Split (' ');
+			//for splitStr length had to account for terminating character?
+			if (splitStr.Length - 1 == map.Length * map [0].Length) {
+				for (int i = 0; i < map.Length; i++) {
+					for (int j = 0; j < map [i].Length; j++) {
+						map [i] [j] = int.Parse (splitStr [(i * map [i].Length) + j]);
+					}
 				}
 			}
 		}
