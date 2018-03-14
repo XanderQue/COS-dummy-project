@@ -292,12 +292,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3861e6a58ec8e4226a889a506a25926a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectSelection: 0
+  objectSelection: 1
   currentTile: {fileID: 730670868}
   chosenGO: {fileID: 1866181865831700, guid: 26af77630b2cd4d1b8742569f934a734, type: 2}
   canPlace: {fileID: 2100000, guid: a6f3bd267e3904d60aa6d7c402805a9d, type: 2}
   cantPlace: {fileID: 2100000, guid: 2b9ce6eafe7764a209c82542439734e8, type: 2}
-  fileName: Untitled
+  filePath: Assets/Untitled.txt
   binMap: {fileID: 4900000, guid: 99eddcdb9c658467d95a805c47882172, type: 3}
 --- !u!4 &644007515
 Transform:

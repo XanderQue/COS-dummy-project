@@ -17,14 +17,15 @@ public class TileBuilder : MonoBehaviour {
 	//Builder::
 	//Position of mouse
 	//place object
-	public int objectSelection = 0;
+	public int objectSelection = 1;
 	public GameObject currentTile;
 	public GameObject chosenGO;
+	public List<GameObject> buildObjects;
 	MeshRenderer tileRend;
 	Transform tileTrans;
 	public Material canPlace;
 	public Material cantPlace;
-	public string fileName;
+	public string filePath="Assets/Untitled.txt";
 	public TextAsset binMap;
 	private int[][] map;
 	private int maxObjects = 5;
@@ -33,8 +34,7 @@ public class TileBuilder : MonoBehaviour {
 	//show a hovering green tile for positioning item
 	// Use this for initialization
 	void Start () {
-		//map = createMap (map, 45, 45);
-		//map = zeroFillMap (map);
+
 		tileTrans = currentTile.transform;
 		tileRend = currentTile.GetComponent<MeshRenderer>();
 		tileRend.enabled = false;
@@ -42,20 +42,20 @@ public class TileBuilder : MonoBehaviour {
 		//Check if file exists , if so open file and read contents
 		map = createMap(map,45,45);
 		map = zeroFillMap (map);
+
 		//if (binMap != null) {
 		debugPrintMap(map);
 		//}
 		readFile ();
+		instantiateMap ();
 	}
 	
 	// Update is called once per frame
-	void Update ()
-	{
+	void Update (){
 		chooseObject ();
 		// go through array and instantiate prefabs in proper positions
 		//createMap ();
 		tilePlacer ();
-
 
 	}
 	//for now changes object selection to write to map
@@ -67,14 +67,59 @@ public class TileBuilder : MonoBehaviour {
 			objectSelection++;
 		}
 	}
+
+	//Read from a local file WILL NEED TO CHANGE**
 	private void readFile(){	
 		//check if the file contains data needed
 		//if no map found create a new map
-		if (binMap.bytes.Length == 0) {
-			Debug.Log ("0 bytes in bin Map");
-
+		StreamReader reader = new StreamReader(filePath);
+		string file = reader.ReadLine();
+		string[] splitStr = file.Split (' ');
+		//for splitStr length had to account for terminating character?
+		if (splitStr.Length - 1 == map.Length * map [0].Length) {
+			for (int i = 0; i < map.Length; i++) {
+				for (int j = 0; j < map [i].Length; j++) {
+					map [i] [j] = int.Parse (splitStr [(i * map [i].Length) + j]);
+				}
+			}
 		}
+		reader.Close();
 
+	}
+	//Save to local file WILL NEED TO CHANGE**
+	private void saveMap(){
+		StreamWriter writer = new StreamWriter(filePath, false);
+		for (int i = 0; i < map.Length; i++) {
+			for (int j = 0; j < map [i].Length; j++) {
+				writer.Write (map[i][j].ToString() + ' ');
+			}
+		}
+		writer.Close();
+	}
+
+	//Instantiate the map to the game
+	private void instantiateMap(){
+		
+		for (int i = 0; i < map.Length; i++) {
+			for (int j = 0; j < map [i].Length; j++) {
+				if (map [i] [j] != 0) {
+					instantiateObject (map [i] [j], i, j);
+				}
+			}
+		}
+	}
+	private void instantiateObject(int choice, int xPos, int zPos){
+		chosenGO = buildObjects[choice -1];
+		Transform mapObjects = GameObject.Find ("MapObjects").transform;
+		if (mapObjects != null && chosenGO != null) {
+			Vector3 goPosition;
+			goPosition.x = xPos+0.5f;
+			goPosition.z = zPos+0.5f;
+			goPosition.y = 0.0f;
+			Transform go = Instantiate(chosenGO.transform, goPosition, Quaternion.identity);
+			go.SetParent (mapObjects);
+			go.gameObject.name = "X : "+(int)Mathf.Floor(goPosition.x)+" Z : "+(int)Mathf.Floor(goPosition.z);
+		}
 	}
 	private void tilePlacer(){
 		Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
@@ -86,10 +131,17 @@ public class TileBuilder : MonoBehaviour {
 				showTile (hit.point);
 
 				if (Input.GetKeyDown(KeyCode.A) || Input.GetMouseButtonDown(0)) {
-					Transform go = Instantiate(chosenGO.transform, tileTrans.position, Quaternion.identity);
-					go.gameObject.name = "X : "+(int)Mathf.Floor(tileTrans.position.x)+" Z : "+(int)Mathf.Floor(tileTrans.position.z);
-					//write to map
-					map [(int)Mathf.Floor(tileTrans.position.x)] [(int)Mathf.Floor(tileTrans.position.z)] = objectSelection;
+					chosenGO = buildObjects [objectSelection - 1];
+					Transform mapObjects = GameObject.Find ("MapObjects").transform;
+					if (mapObjects != null && chosenGO != null) {
+						Transform go = Instantiate (chosenGO.transform, tileTrans.position, Quaternion.identity);
+						go.SetParent (mapObjects);
+						go.gameObject.name = "X : " + (int)Mathf.Floor (tileTrans.position.x) + " Z : " + (int)Mathf.Floor (tileTrans.position.z);
+						//write to map
+						map [(int)Mathf.Floor (tileTrans.position.x)] [(int)Mathf.Floor (tileTrans.position.z)] = objectSelection;
+						//save to file
+						saveMap ();
+					}
 				}
 
 
